@@ -76,6 +76,7 @@ router.patch("/:id/complete", async (req, res) => {
         return res.status(500).send("Error updating task");
     }
 });
+
 router.get("/stats", async (req, res) => {
     try {
         const [
@@ -109,6 +110,83 @@ router.get("/stats", async (req, res) => {
         }
 });
 
+router.post("/:id/subtasks", async(req, res) => {
+    try{
+        if(!req.body.title || !req.body.title.trim()) {
+            return res.status(400).send("Subtask title is required");
+        }
 
+        const task = await Task.findById(req.params.id);
+        if(!task) {
+            return res.status(404).send("Task not found");
+        }
+
+        //push new subtask
+        task.subtasks.push({
+            title: req.body.title
+        });
+
+        await task.save();
+
+        res.json(task);
+    } catch(err) {
+        console.log(err);
+        res.status(500).send("Error adding subtask");
+    }
+});
+
+router.patch("/:taskId/subtasks/:subtaskId", async(req, res) => {
+    try {
+        console.log("BODY: ", req.body);
+        console.log(typeof req.body.completed);
+        const { taskId, subtaskId } = req.params;
+
+        const task = await Task.findById(taskId);
+
+        if(!task) {
+            return res.status(404).send("task not found");
+        }
+
+        // find subtask inside array
+        const subtask = task.subtasks.id(subtaskId);
+
+        if(!subtask) {
+            return res.status(404).send("subtask not found");
+        }
+        console.log("before: ", subtask.completed);
+        // update field if provided
+        if(req.body.completed !== undefined) {
+            subtask.completed = req.body.completed;
+        }
+        console.log("after: ", subtask.completed);
+        await task.save();
+
+        res.json(task);
+    } catch(err) {
+        console.log(err);
+        return res.status(500).send("error updating task");
+    }
+});
+
+router.delete("/:taskId/subtasks/:subtaskId", async(req, res) => {
+    try {
+        const { taskId, subtaskId } = req.params;
+
+        const task = await Task.findById(taskId);
+
+        if(!task) {
+            return res.status(404).send("task not found");
+        }
+
+        task.subtasks.pull(subtaskId);
+
+        await task.save();
+
+        res.json(task);
+    } catch(err) {
+        console.log(err);
+        res.status(500).send("error deleting subtask");
+    }
+})
 
 module.exports = router;
