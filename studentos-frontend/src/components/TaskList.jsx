@@ -1,6 +1,6 @@
 import TaskItem from "./TaskItem";
 
-function TaskList({ tasks, filter, completeTask, deleteTask }) {
+function TaskList({ tasks, filter, completeTask, deleteTask, addSubtask, toggleSubtask, deleteSubtask }) {
 
 
   const today = new Date();
@@ -56,6 +56,9 @@ const processedTasks = [...tasks]
             task={task}
             completeTask={completeTask}
             deleteTask={deleteTask}
+            addSubtask={addSubtask}
+            toggleSubtask={toggleSubtask}
+            deleteSubtask={deleteSubtask}
           />
         ))}
       </ul>

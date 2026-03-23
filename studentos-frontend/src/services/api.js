@@ -33,3 +33,28 @@ export const deleteTaskAPI = async (id) => {
     method: "DELETE"
   });
 };
+
+export const addSubtaskAPI = async (taskId, title) => {
+  const res = await fetch(`${BASE_URL}/tasks/${taskId}/subtasks`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({title})
+  });
+  return res.json();
+};
+
+export const toggleSubtaskAPI = async (taskId, subtaskId, completed) => {
+  const res = await fetch(`${BASE_URL}/tasks/${taskId}/subtasks/${subtaskId}`, {
+    method: "PATCH",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({completed})
+  });
+  return res.json();
+};
+
+export const deleteSubtaskAPI = async (taskId, subtaskId) => {
+  const res = await fetch(`${BASE_URL}/tasks/${taskId}/subtasks/${subtaskId}`, {
+    method: "DELETE" 
+  });
+  return res.json();
+};

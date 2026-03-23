@@ -1,4 +1,5 @@
-function TaskItem({ task, completeTask, deleteTask }) {
+import SubtaskList from "./SubtaskList";
+function TaskItem({ task, completeTask, deleteTask, addSubtask, toggleSubtask, deleteSubtask }) {
 
   const today = new Date();
   today.setHours(0,0,0,0);
@@ -45,6 +46,13 @@ function TaskItem({ task, completeTask, deleteTask }) {
 
       <span>
         {task.title}
+
+        <SubtaskList
+      task={task}
+      addSubtask={addSubtask}
+      toggleSubtask={toggleSubtask}
+      deleteSubtask={deleteSubtask}
+    />
 
         <span className="badge bg-secondary ms-2">{task.type}</span>
 

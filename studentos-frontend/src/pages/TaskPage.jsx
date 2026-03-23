@@ -10,6 +10,9 @@ import {
   createTaskAPI,
   completeTaskAPI,
   deleteTaskAPI,
+  addSubtaskAPI,
+  toggleSubtaskAPI,
+  deleteSubtaskAPI
 } from "../services/api";
 
 const TaskPage = () => {
@@ -60,6 +63,34 @@ const TaskPage = () => {
     );
   };
 
+  const addSubtask = async (taskId, title) => {
+    const updated = await addSubtaskAPI(taskId, title);
+
+    setTasks(prev =>
+      prev.map(t => t._id === taskId ? updated : t)
+    );
+  };
+
+  const toggleSubtask = async (taskId, subtask) => {
+    const updated = await toggleSubtaskAPI(
+      taskId, 
+      subtask._id,
+      !subtask.completed
+    );
+
+    setTasks(prev =>
+      prev.map(t => t._id === taskId ? updated : t)
+    );
+  };
+
+  const deleteSubtask = async (taskId, subtask) => {
+    const updated = await deleteSubtaskAPI(taskId, subtask._id);
+
+    setTasks(prev =>
+      prev.map(t => t._id === taskId ? updated : t)
+    );
+  };
+
   return (
     <div className="container mt-4">
       <h1 className="text-center mb-4">StudentOS</h1>
@@ -83,6 +114,9 @@ const TaskPage = () => {
         filter={filter}
         completeTask={completeTask}
         deleteTask={deleteTask}
+        addSubtask={addSubtask}
+        toggleSubtask={toggleSubtask}
+        deleteSubtask={deleteSubtask}
       />
     </div>
   );
