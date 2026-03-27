@@ -41,6 +41,12 @@ function TaskItem({ task, completeTask, deleteTask, addSubtask, toggleSubtask, d
     }
   }
 
+  const total = task.subtasks?.length || 0;
+
+  const completed = task.subtasks?.filter(s => s.completed).length || 0;
+
+  const progress = total === 0 ? 0 : Math.round((completed / total) * 100);
+
   return (
     <li className={`list-group-item d-flex justify-content-between align-items-center border-start border-4 ${priorityColor}`}>
 
@@ -53,7 +59,19 @@ function TaskItem({ task, completeTask, deleteTask, addSubtask, toggleSubtask, d
       toggleSubtask={toggleSubtask}
       deleteSubtask={deleteSubtask}
     />
+    <div className="mt-2">
+  <div className="progress" style={{ height: "8px" }}>
+    <div
+      className="progress-bar"
+      role="progressbar"
+      style={{ width: `${progress}%` }}
+    ></div>
+  </div>
 
+  <small className="text-muted">
+    {completed}/{total} subtasks completed
+  </small>
+</div>
         <span className="badge bg-secondary ms-2">{task.type}</span>
 
         <span className={`badge ms-2 ${
