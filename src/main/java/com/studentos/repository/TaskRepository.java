@@ -1,67 +1,43 @@
 package com.studentos.repository;
 
 import com.studentos.model.Task;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.time.LocalDate;
 
-// @Repository tells Spring: this is a bean that handles data access
-// On Day 25 this class gets replaced by one JpaRepository interface
-// Today: in-memory list simulates a database
 @Repository
-public class TaskRepository {
+public interface TaskRepository extends JpaRepository<Task, Integer> {
+    // JpaRepository<Task, Integer>:
+    // Task = the entity type this repository manages
+    // Integer = the type of the primary key (id field type)
 
-    // The "database" - stored in memory
-    // Resets every time the server restarts - exactly like a real DB before you connect one
-    private final List<Task> tasks = new ArrayList<>();
-    private int nextId = 1; // auto-increment id - same concept as database sequence
+    // Spring Data Jpa provides these methods automatically - no implementation needed:
+    // findAll()           → SELECT * FROM tasks
+    // findById(id)        → SELECT * FROM tasks WHERE id = ?
+    // save(task)          → INSERT or UPDATE (INSERT if no id, UPDATE if id exists)
+    // deleteById(id)      → DELETE FROM tasks WHERE id = ?
+    // count()             → SELECT COUNT(*) FROM tasks
+    // existsById(id)      → SELECT EXISTS(SELECT 1 FROM tasks WHERE id = ?)
 
-    // Initialize with sample data so you have something to see
-    public TaskRepository() {
-        tasks.add(new Task(nextId++, "Complete Spring Boot assignment",
-                "Assignment", java.time.LocalDate.now().plusDays(3), "high"));
-        tasks.add(new Task(nextId++, "Study for DBMS exam",
-                "Exam", java.time.LocalDate.now().minusDays(1), "urgent"));
-        tasks.add(new Task(nextId++, "Build portfolio website",
-                "Project", java.time.LocalDate.now().plusDays(7), "medium"));
-    }
+    // Custom query methods - Spring generates SQL from the method name
+    // This is called "derived queries" - no SQL or @Query annotation needed
+    List<Task> findByCompleted(boolean completed);
+    // generates: SELECT * FROM tasks WHERE completed = ?
 
-    public List<Task> findAll() {
-        return new ArrayList<>(tasks); // return a copy - callers cannot modify internal data structure
-    }
+    List<Task> findByType(String type);
+    // generates: SELECT * FROM tasks WHERE type = ?
 
-    // Optional: explicitly represents "might not exist"
-    // WHY Optional instead of returning null:
-    // Returning null = caller might forget to check = NullPointerException at 2am in production
-    // Optional = compiler forces caller to handle the "not found" case explicitly
-    public Optional<Task> findById(int id) {
-        return tasks.stream()
-                .filter(task -> task.getId() == id)
-                .findFirst();
-    }
+    List<Task> findByDeadlineBefore(LocalDate date);
+    // generates: SELECT * FROM tasks WHERE deadline < ?
 
-    public Task save(Task task) {
-        task.setId(nextId++);
-        task.setCreatedAt(java.time.LocalDateTime.now());
-        tasks.add(task);
-        return task;
-    }
+    List<Task> findByCompletedFalseOrderByDeadlineAsc();
+    // generates: SELECT * FROM tasks WHERE completed = false ORDER BY deadline ASC
 
-    public Optional<Task> update(int id, Task updatedTask) {
-        for(int i = 0; i < tasks.size(); i++) {
-            if(tasks.get(i).getId() == id) {
-                updatedTask.setId(id);
-                updatedTask.setCreatedAt(tasks.get(i).getCreatedAt());
-                tasks.set(i, updatedTask);
-                return Optional.of(updatedTask);
-            }
-        }
-        return Optional.empty();
-    }
-
-    public boolean deleteById(int id) {
-        return tasks.removeIf(task -> task.getId() == id);
-    }
+    List<Task> findByTypeAndCompleted(String type, boolean completed);
+    // generates: SELECT * FROM tasks WHERE type = ? AND completed = ?
 }

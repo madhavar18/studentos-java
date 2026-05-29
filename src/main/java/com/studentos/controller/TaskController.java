@@ -34,8 +34,8 @@ public class TaskController {
 
     // GET /api/tasks/1 -> return task with id 1
     @GetMapping("/{id}")
-    public ResponseEntity<Task> getTaskById(@PathVariable int id) {
-        Optional<Task> task = taskService.getTaskByid(id);
+    public ResponseEntity<Task> getTaskById(@PathVariable Integer id) {
+        Optional<Task> task = taskService.getTaskById(id);
 
         // If present: return 200 with task
         // If not: return 404 - the resource does not exist
@@ -54,7 +54,7 @@ public class TaskController {
 
     // PATCH /api/tasks/1/complete -> mark task as complete
     @PatchMapping("/{id}/complete")
-    public ResponseEntity<Task> completeTask(@PathVariable int id) {
+    public ResponseEntity<Task> completeTask(@PathVariable Integer id) {
         Optional<Task> completed = taskService.completeTask(id);
         return completed
                 .map(ResponseEntity::ok)
@@ -63,11 +63,21 @@ public class TaskController {
 
     // DELETE /api/tasks/1 -> delete task
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteTask(@PathVariable int id) {
+    public ResponseEntity<Void> deleteTask(@PathVariable Integer id) {
         boolean deleted = taskService.deleteTask(id);
         if(deleted) {
             return ResponseEntity.noContent().build(); // 204 - No Content - success, nothing to return
         }
         return ResponseEntity.notFound().build(); // 404 - nothing was there to delete
+    }
+
+    @GetMapping("/pending")
+    public ResponseEntity<List<Task>> getPendingTasks() {
+        return ResponseEntity.ok(taskService.getPendingTasks());
+    }
+
+    @GetMapping("/overdue")
+    public ResponseEntity<List<Task>> getOverdueTasks() {
+        return ResponseEntity.ok(taskService.getOverdueTasks());
     }
 }

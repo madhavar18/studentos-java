@@ -29,7 +29,7 @@ public class TaskService {
 
     // Business rule: when retrieving a task, calculate its urgency
     // This is business logic - it belongs in Service, not in Controller or Repository
-    public Optional<Task> getTaskByid(int id) {
+    public Optional<Task> getTaskById(Integer id) {
         return taskRepository.findById(id);
     }
 
@@ -41,22 +41,39 @@ public class TaskService {
             task.setPriority("medium");
         }
         return taskRepository.save(task);
+        // If task.id is null: INSERT INTO tasks (...) VALUES (...)
+        // PostgreSQL assigns the id, Hibernate sets it on the returned object
     }
 
-    public Optional<Task> completeTask(int id) {
+    public Optional<Task> completeTask(Integer id) {
         Optional<Task> found = taskRepository.findById(id);
         if(found.isPresent()) {
             Task task = found.get();
             task.setCompleted(true);
             // Business rule: update the task in the store
-            taskRepository.update(id, task);
+            taskRepository.save(task);
             return Optional.of(task);
         }
         return Optional.empty();
     }
 
-    public boolean deleteTask(int id) {
-        return taskRepository.deleteById(id);
+    public List<Task> getPendingTasks() {
+        return taskRepository.findByCompleted(false);
+    }
+
+    public List<Task> getOverdueTasks() {
+        return taskRepository.findByDeadlineBefore(LocalDate.now())
+                .stream()
+                .filter(t -> !t.isCompleted())
+                .toList();
+    }
+
+    public boolean deleteTask(Integer id) {
+        if(taskRepository.existsById(id)) {
+            taskRepository.deleteById(id);
+            return true;
+        }
+        return false;
     }
 
     // Business logic: calculate urgency based on deadline
