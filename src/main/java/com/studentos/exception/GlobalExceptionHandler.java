@@ -73,4 +73,13 @@ public class GlobalExceptionHandler {
         // Never send ex.getMessage() for generic exceptions to the client
         // It might contain sensitive internal information
     }
+
+    @ExceptionHandler(RuntimeException.class)
+    public ResponseEntity<ApiResponse<Void>> handleRunTimeException(RuntimeException ex) {
+        // Return 409 conflict with the exception message
+        // this handles "Username already taken" and "Email already registered"
+        return ResponseEntity
+                .status(HttpStatus.CONFLICT)
+                .body(ApiResponse.error(ex.getMessage()));
+    }
 }
